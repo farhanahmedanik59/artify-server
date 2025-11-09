@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
 });
 
 // connect mongodb
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster1.gq2vs5u.mongodb.net/?appName=Cluster1`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -34,9 +34,25 @@ async function run() {
     const arts = database.collection("arts");
 
     // arts related api
+
+    // recent arts
     app.get("/recentarts", async (req, res) => {
       const cursor = arts.find().sort({ createdAt: -1 }).limit(6);
       const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // top artists
+    app.get("/arts/topartists", async (req, res) => {
+      const curros = arts.find().sort({ likes: -1 }).limit(4);
+      const result = await curros.toArray();
+      res.send(result);
+    });
+
+    // artsBy id
+    app.get("/arts/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await arts.findOne({ _id: new ObjectId(id) });
       res.send(result);
     });
 
