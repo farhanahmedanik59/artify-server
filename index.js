@@ -30,14 +30,63 @@ async function run() {
 
     //creating Db and collection
     const database = client.db("artify");
-    const users = database.collection("users");
     const arts = database.collection("arts");
 
     // arts related api
+    // update art data
+    app.patch("/update-art/:id", async (req, res) => {
+      const id = req.params.id;
+      const form = req.body;
+      console.log(form.photoURL);
+      const update = {
+        $set: {
+          artistImageURL: form.imageURL,
+          imageURL: form.imageURL,
+          title: form.title,
+          category: form.category,
+          medium: form.medium,
+          description: form.description,
+          dimensions: form.dimensions,
+          price: form.price,
+          likes: form.likes,
+          visibility: form.visibility,
+        },
+      };
+      const result = await arts.updateOne({ _id: new ObjectId(id) }, update, {});
+      res.send(result);
+    });
+
+    // my arts
+    app.get("/my-arts", async (req, res) => {
+      const email = req.query.email;
+      const cursor = await arts.find({ userEmail: email });
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // delete art
+    app.delete("/delete-art/:id", async (req, res) => {
+      const id = req.headers.id;
+      const result = await arts.deleteOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
+    //add art
+    app.post("/add-art", async (req, res) => {
+      const newArt = req.body;
+      const addArt = await arts.insertOne(newArt);
+      res.send(addArt);
+    });
 
     // recent arts
     app.get("/recentarts", async (req, res) => {
       const cursor = arts.find().sort({ createdAt: -1 }).limit(6);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // all arts
+    app.get("/allarts", async (req, res) => {
+      const cursor = arts.find({ visibility: "Public" }).sort({ createdAt: -1 });
       const result = await cursor.toArray();
       res.send(result);
     });
