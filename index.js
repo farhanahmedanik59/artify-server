@@ -97,7 +97,7 @@ async function run() {
     app.post("/favorites", async (req, res) => {
       const favorite = req.body;
       const findinarts = await arts.findOne({ _id: new ObjectId(favorite.artwordId) });
-      console.log(findinarts.likes);
+
       const exists = await favouriteCollection.findOne({
         artwordId: favorite.artwordId,
         favorite: favorite.favorite,
@@ -168,8 +168,6 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
   }
