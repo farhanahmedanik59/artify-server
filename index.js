@@ -31,8 +31,27 @@ async function run() {
     //creating Db and collection
     const database = client.db("artify");
     const arts = database.collection("arts");
+    const favouriteCollection = database.collection("favourite");
 
     // arts related api
+
+    // like update
+    app.patch("/arts/like/:id", async (req, res) => {
+      const id = req.params.id;
+      try {
+        const art = await arts.findOne({ _id: new ObjectId(id) });
+        if (!art) return res.status(404).send({ message: "Artwork not found" });
+
+        const updatedLikes = (art.likes || 0) + 1;
+        const result = await arts.updateOne({ _id: new ObjectId(id) }, { $set: { likes: updatedLikes } });
+
+        res.send({ success: true, likes: updatedLikes });
+      } catch (error) {
+        console.error("Error updating likes:", error);
+        res.status(500).send({ success: false, message: "Error updating likes" });
+      }
+    });
+
     // update art data
     app.patch("/update-art/:id", async (req, res) => {
       const id = req.params.id;
@@ -56,6 +75,41 @@ async function run() {
       res.send(result);
     });
 
+    // remove favourite
+    app.delete("/favorites/:id", async (req, res) => {
+      console.log("hit");
+      const email = req.query.email;
+      const id = req.query.id;
+      console.log(id, email);
+      const result = await favouriteCollection.deleteOne({ artwordId: id, favorite: email });
+      console.log(result);
+      res.send(result);
+    });
+
+    // get favorite
+    app.get("/favorites", async (req, res) => {
+      const email = req.query.email;
+      const cursor = favouriteCollection.find({ favorite: email });
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // favourite
+    app.post("/favorites", async (req, res) => {
+      const favorite = req.body;
+      const exists = await favouriteCollection.findOne({
+        artwordId: favorite.artwordId,
+        userEmail: favorite.favorite,
+      });
+
+      if (exists) {
+        return res.send({ message: "Already added" });
+      }
+
+      const result = await favouriteCollection.insertOne(favorite);
+      res.send(result);
+    });
+
     // my arts
     app.get("/my-arts", async (req, res) => {
       const email = req.query.email;
@@ -66,7 +120,7 @@ async function run() {
 
     // delete art
     app.delete("/delete-art/:id", async (req, res) => {
-      const id = req.headers.id;
+      const id = req.params.id;
       const result = await arts.deleteOne({ _id: new ObjectId(id) });
       res.send(result);
     });
