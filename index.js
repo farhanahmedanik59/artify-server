@@ -44,7 +44,7 @@ async function run() {
 
         const updatedLikes = (art.likes || 0) + 1;
         const result = await arts.updateOne({ _id: new ObjectId(id) }, { $set: { likes: updatedLikes } });
-
+        favouriteCollection.updateMany({ artwordId: id }, { $set: { likes: updatedLikes } });
         res.send({ success: true, likes: updatedLikes });
       } catch (error) {
         console.error("Error updating likes:", error);
@@ -56,7 +56,6 @@ async function run() {
     app.patch("/update-art/:id", async (req, res) => {
       const id = req.params.id;
       const form = req.body;
-      console.log(form.photoURL);
       const update = {
         $set: {
           artistImageURL: form.imageURL,
@@ -73,7 +72,7 @@ async function run() {
       };
       const result = await arts.updateOne({ _id: new ObjectId(id) }, update, {});
       try {
-        favouriteCollection.updateOne({ artwordId: id }, update, {});
+        favouriteCollection.updateMany({ artwordId: id }, update, {});
       } catch {}
       res.send(result);
     });
@@ -97,15 +96,17 @@ async function run() {
     // favourite
     app.post("/favorites", async (req, res) => {
       const favorite = req.body;
+      const findinarts = await arts.findOne({ _id: new ObjectId(favorite.artwordId) });
+      console.log(findinarts.likes);
       const exists = await favouriteCollection.findOne({
         artwordId: favorite.artwordId,
-        userEmail: favorite.favorite,
+        favorite: favorite.favorite,
       });
 
       if (exists) {
         return res.send({ message: "Already added" });
       }
-
+      favorite.likes = findinarts.likes;
       const result = await favouriteCollection.insertOne(favorite);
       res.send(result);
     });
