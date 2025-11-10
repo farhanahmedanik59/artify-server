@@ -3,7 +3,8 @@ const cors = require("cors");
 require("dotenv").config();
 const app = express();
 app.use(cors());
-const port = process.env.PORT || 3000;
+console.log(process.env.PORT);
+const port = process.env.PORT;
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -172,7 +173,7 @@ async function run() {
     // Ensures that the client will close when you finish/error
   }
 }
-run().catch(console.dir);
+run();
 
 app.listen(port, () => {
   console.log("server running");
