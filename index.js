@@ -72,17 +72,17 @@ async function run() {
         },
       };
       const result = await arts.updateOne({ _id: new ObjectId(id) }, update, {});
+      try {
+        favouriteCollection.updateOne({ artwordId: id }, update, {});
+      } catch {}
       res.send(result);
     });
 
     // remove favourite
     app.delete("/favorites/:id", async (req, res) => {
-      console.log("hit");
       const email = req.query.email;
       const id = req.query.id;
-      console.log(id, email);
       const result = await favouriteCollection.deleteOne({ artwordId: id, favorite: email });
-      console.log(result);
       res.send(result);
     });
 
@@ -122,6 +122,9 @@ async function run() {
     app.delete("/delete-art/:id", async (req, res) => {
       const id = req.params.id;
       const result = await arts.deleteOne({ _id: new ObjectId(id) });
+      try {
+        favouriteCollection.deleteOne({ artwordId: id });
+      } catch {}
       res.send(result);
     });
     //add art
@@ -156,7 +159,11 @@ async function run() {
     app.get("/arts/:id", async (req, res) => {
       const id = req.params.id;
       const result = await arts.findOne({ _id: new ObjectId(id) });
-      res.send(result);
+      if (!result) {
+        res.send({ photoURL: "https://www.shutterstock.com/image-vector/delete-data-icon-document-folder-600nw-2380559695.jpg" });
+      } else {
+        res.send(result);
+      }
     });
 
     // Send a ping to confirm a successful connection
