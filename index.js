@@ -2,10 +2,14 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
-app.use(cors());
 const port = process.env.PORT;
 app.use(express.json());
-
+app.use(
+  cors({
+    origin: "https://assignment10-297ce.web.app",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 app.get("/", (req, res) => {
   res.send("working");
 });
