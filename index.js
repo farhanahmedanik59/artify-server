@@ -3,7 +3,6 @@ const cors = require("cors");
 require("dotenv").config();
 const app = express();
 app.use(cors());
-console.log(process.env.PORT);
 const port = process.env.PORT;
 app.use(express.json());
 
@@ -167,8 +166,8 @@ async function run() {
         res.send(result);
       }
     });
-
-    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    console.log("server connected"); // Send a ping to confirm a successful connection
   } finally {
     // Ensures that the client will close when you finish/error
   }
