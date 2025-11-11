@@ -26,7 +26,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     //creating Db and collection
     const database = client.db("artify");
@@ -35,17 +35,21 @@ async function run() {
 
     // arts related api
 
-    // like update
     app.patch("/arts/like/:id", async (req, res) => {
       const id = req.params.id;
-      try {
-        const art = await arts.findOne({ _id: new ObjectId(id) });
-        if (!art) return res.status(404).send({ message: "Artwork not found" });
 
-        const updatedLikes = (art.likes || 0) + 1;
-        const result = await arts.updateOne({ _id: new ObjectId(id) }, { $set: { likes: updatedLikes } });
-        favouriteCollection.updateMany({ artwordId: id }, { $set: { likes: updatedLikes } });
-        res.send({ success: true, likes: updatedLikes });
+      try {
+        const updateResult = await arts.updateOne({ _id: new ObjectId(id) }, { $inc: { likes: 1 } });
+
+        if (updateResult.matchedCount === 0) {
+          return res.status(404).send({ success: false, message: "Art not found" });
+        }
+
+        const updatedArt = await arts.findOne({ _id: new ObjectId(id) });
+
+        await favouriteCollection.updateMany({ artwordId: id }, { $set: { likes: updatedArt.likes } });
+
+        res.send({ success: true, likes: updatedArt.likes });
       } catch (error) {
         console.error("Error updating likes:", error);
         res.status(500).send({ success: false, message: "Error updating likes" });
@@ -166,13 +170,11 @@ async function run() {
         res.send(result);
       }
     });
-    await client.db("admin").command({ ping: 1 });
-    console.log("server connected"); // Send a ping to confirm a successful connection
   } finally {
     // Ensures that the client will close when you finish/error
   }
 }
-run();
+run().catch(console.dir);
 
 app.listen(port, () => {
   console.log("server running");
