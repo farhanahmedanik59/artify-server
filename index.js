@@ -56,6 +56,13 @@ async function run() {
       }
     });
 
+    // arts count
+    app.get("/arts/count/:email", async (req, res) => {
+      const email = req.params.email;
+      const count = await arts.countDocuments({ userEmail: email });
+      res.send({ count });
+    });
+
     // update art data
     app.patch("/update-art/:id", async (req, res) => {
       const id = req.params.id;
