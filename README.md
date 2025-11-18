@@ -1,9 +1,5 @@
-# Artify 🎨
+# Artify Server 🎨
 
-![GitHub repo size](https://img.shields.io/github/repo-size/yourusername/artify-server?style=for-the-badge)
-![GitHub stars](https://img.shields.io/github/stars/yourusername/artify-server?style=for-the-badge)
-![GitHub issues](https://img.shields.io/github/issues/yourusername/artify-server?style=for-the-badge)
-![License](https://img.shields.io/github/license/yourusername/artify-server?style=for-the-badge)
 
 Artify is a platform for **art sharing**, allowing artists and enthusiasts to showcase and explore creative works.  
 This repository contains the **backend server** built with **Express.js**.
