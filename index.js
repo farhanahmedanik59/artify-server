@@ -167,6 +167,13 @@ async function run() {
       res.send(result);
     });
 
+    // statistics
+    app.get("/statistics", async (req, res) => {
+      const allArts = await arts.countDocuments();
+      const favourite = await favouriteCollection.countDocuments();
+      res.send({ allArts, favourite });
+    });
+
     // artsBy id
     app.get("/arts/:id", async (req, res) => {
       const id = req.params.id;
