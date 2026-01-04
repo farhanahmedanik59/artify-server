@@ -154,10 +154,33 @@ async function run() {
     });
 
     // all arts
+    // app.get("/allarts", async (req, res) => {
+    //   const cursor = arts.find({ visibility: "Public" }).sort({ createdAt: -1 });
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // });
     app.get("/allarts", async (req, res) => {
-      const cursor = arts.find({ visibility: "Public" }).sort({ createdAt: -1 });
-      const result = await cursor.toArray();
-      res.send(result);
+      try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 6;
+
+        const skip = (page - 1) * limit;
+
+        const query = { visibility: "Public" };
+
+        const total = await arts.countDocuments(query);
+
+        const result = await arts.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).toArray();
+
+        res.send({
+          data: result,
+          total,
+          totalPages: Math.ceil(total / limit),
+          currentPage: page,
+        });
+      } catch (error) {
+        res.status(500).send({ message: "Server Error" });
+      }
     });
 
     // top artists
